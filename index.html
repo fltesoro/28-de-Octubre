@@ -1,0 +1,886 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cotizador e Integración Logística Fast Track</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800&family=Roboto:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: 'Montserrat', sans-serif; 
+    }
+    body { 
+      background-color: #1a1a1a; 
+      margin: 0; 
+      padding: 20px 0; 
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    
+    .slide-container {
+      width: 1280px;
+      height: 720px;
+      margin: 0 auto;
+      overflow: hidden;
+      box-sizing: border-box;
+      background-color: #F2F2F2;
+      color: #4B4443;
+      position: relative;
+      display: none; /* Controlled by JS navigation */
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 32px 60px;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+    }
+
+    .slide-container.active-slide {
+      display: flex;
+    }
+
+    /* Standard Brand Header */
+    .brand-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 3px solid #BA1829;
+      padding-bottom: 12px;
+    }
+
+    .logo-box {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .logo-main {
+      font-size: 28px;
+      font-weight: 900;
+      font-style: italic;
+      color: #BA1829;
+      letter-spacing: -1px;
+    }
+
+    .logo-main span {
+      color: #4B4443;
+    }
+
+    .logo-sub {
+      font-size: 13px;
+      font-weight: 700;
+      color: #BA1829;
+      font-style: italic;
+      margin-top: -4px;
+    }
+
+    /* Step Navigation Bar */
+    .step-nav-bar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      background: #FFFFFF;
+      padding: 8px 16px;
+      border-radius: 30px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .step-chip {
+      background: #E5E5E5;
+      color: #4B4443;
+      padding: 6px 14px;
+      border-radius: 16px;
+      font-size: 12px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .step-chip:hover {
+      background: #D1D1D1;
+    }
+
+    .step-chip.active {
+      background: #BA1829;
+      color: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(186, 24, 41, 0.3);
+    }
+
+    .help-btn {
+      background-color: #BA1829;
+      color: #FFFFFF;
+      border: none;
+      padding: 8px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 4px 10px rgba(186, 24, 41, 0.25);
+      transition: all 0.2s ease;
+    }
+
+    .help-btn:hover {
+      background-color: #7A1A11;
+    }
+
+    /* Forms & Inputs */
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .form-group.full-width {
+      grid-column: span 2;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+      color: #4B4443;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 10px 14px;
+      border: 2px solid #D1D1D1;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #4B4443;
+      background: #FFFFFF;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+
+    input:focus, select:focus {
+      border-color: #BA1829;
+    }
+
+    /* Questions Styling */
+    .question-card {
+      background: #FFFFFF;
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-left: 5px solid #BA1829;
+    }
+
+    .question-text {
+      font-size: 15px;
+      font-weight: 600;
+      color: #4B4443;
+      max-width: 800px;
+    }
+
+    .select-sm {
+      width: 130px;
+      font-weight: 700;
+    }
+
+    /* Cards & Layouts */
+    .card-row {
+      display: flex;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .info-card {
+      background: #FFFFFF;
+      border-radius: 12px;
+      padding: 20px;
+      flex: 1;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      border-top: 4px solid #BA1829;
+    }
+
+    .info-card h3 {
+      font-size: 16px;
+      color: #BA1829;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-action {
+      background: #BA1829;
+      color: #FFFFFF;
+      font-size: 16px;
+      font-weight: 700;
+      padding: 14px 32px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      box-shadow: 0 6px 16px rgba(186, 24, 41, 0.3);
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-action:hover {
+      background: #7A1A11;
+      transform: translateY(-2px);
+    }
+
+    /* Modal / Glossary */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0,0,0,0.6);
+      z-index: 999;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #FFFFFF;
+      width: 850px;
+      max-height: 80vh;
+      border-radius: 12px;
+      padding: 32px;
+      overflow-y: auto;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #F2F2F2;
+      padding-bottom: 12px;
+      margin-bottom: 16px;
+    }
+
+    .modal-header h2 {
+      color: #BA1829;
+      font-size: 20px;
+    }
+
+    .close-modal {
+      font-size: 28px;
+      cursor: pointer;
+      color: #4B4443;
+      line-height: 1;
+      border: none;
+      background: none;
+    }
+
+    .glossary-item {
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid #F0F0F0;
+    }
+
+    .glossary-item h4 {
+      color: #BA1829;
+      font-size: 15px;
+      margin-bottom: 4px;
+    }
+
+    .glossary-item p {
+      color: #4B4443;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .nav-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 14px;
+      border-top: 1px solid #E5E5E5;
+    }
+
+    .nav-btn {
+      background: #4B4443;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      font-size: 13px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: background 0.2s;
+    }
+
+    .nav-btn:hover {
+      background: #1a1a1a;
+    }
+
+    .metric-badge {
+      background: #F2F2F2;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-top: 8px;
+      font-weight: 700;
+      color: #BA1829;
+      font-size: 18px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- SLIDE 1: DATOS DE CONTACTO -->
+  <div class="slide-container active-slide" id="slide1">
+    <div class="brand-header">
+      <div class="logo-box">
+        <div class="logo-main">FAST<span>TRACK</span></div>
+        <div class="logo-sub">Logística 5.0</div>
+      </div>
+
+      <div class="step-nav-bar">
+        <button class="step-chip active" onclick="goToSlide(1)"><i class="fa-solid fa-1"></i> Registro</button>
+        <button class="step-chip" onclick="goToSlide(2)"><i class="fa-solid fa-2"></i> Requerimientos</button>
+        <button class="step-chip" onclick="goToSlide(3)"><i class="fa-solid fa-3"></i> Operativa</button>
+        <button class="step-chip" onclick="goToSlide(4)"><i class="fa-solid fa-4"></i> Cotización</button>
+        <button class="step-chip" onclick="goToSlide(5)"><i class="fa-solid fa-5"></i> Resumen</button>
+        <button class="step-chip" onclick="goToSlide(6)"><i class="fa-solid fa-6"></i> Fin</button>
+      </div>
+
+      <button class="help-btn" onclick="openGlossary()"><i class="fa-solid fa-circle-question"></i> Glosario</button>
+    </div>
+
+    <div>
+      <h1 style="font-size: 24px; color: #4B4443; margin-bottom: 6px;">Relevamiento Operativo y Cotización</h1>
+      <p style="font-size: 14px; color: #666;">Ingrese sus datos de contacto para iniciar la evaluación logística personalizada.</p>
+
+      <form id="form-step1" class="form-grid" onsubmit="event.preventDefault(); goToSlide(2);">
+        <div class="form-group">
+          <label>Nombre y Apellido *</label>
+          <input type="text" id="input-nombre" placeholder="Ej: Maria Gonzalez" required oninput="updateSummary()">
+        </div>
+        <div class="form-group">
+          <label>Empresa *</label>
+          <input type="text" id="input-empresa" placeholder="Ej: Logix S.A." required oninput="updateSummary()">
+        </div>
+        <div class="form-group">
+          <label>Email Corporativo *</label>
+          <input type="email" id="input-email" placeholder="ejemplo@empresa.com" required oninput="updateSummary()">
+        </div>
+        <div class="form-group">
+          <label>Teléfono *</label>
+          <input type="tel" id="input-telefono" placeholder="+54 11 4000-0000" required oninput="updateSummary()">
+        </div>
+        <div class="form-group full-width">
+          <label>Ejecutivo Comercial con el que hablaste *</label>
+          <select id="select-ejecutivo" required onchange="updateExecutiveEmail()">
+            <option value="">-- Seleccione un Ejecutivo --</option>
+            <option value="Cruz Camerlinckx|ccamerlinckx@fasttrack.com.ar">Cruz Camerlinckx</option>
+            <option value="Alejandro Rush|arush@fasttrack.com.ar">Alejandro Rush</option>
+            <option value="Joaquin Outeiral|jouteiral@fasttrack.com.ar">Joaquin Outeiral</option>
+            <option value="Julian Quetglas Bojar|jquetglas@fasttrack.com.ar">Julian Quetglas Bojar</option>
+            <option value="Brenda Lafuente|blafuente@fasttrack.com.ar">Brenda Lafuente</option>
+          </select>
+        </div>
+      </form>
+    </div>
+
+    <div class="nav-footer">
+      <span style="font-size: 12px; color: #888;">Complete los datos para avanzar o use los botones de la barra superior.</span>
+      <button class="nav-btn" onclick="goToSlide(2)">Siguiente <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+
+  <!-- SLIDE 2: PREGUNTAS PARTE 1 -->
+  <div class="slide-container" id="slide2">
+    <div class="brand-header">
+      <div class="logo-box">
+        <div class="logo-main">FAST<span>TRACK</span></div>
+        <div class="logo-sub">Logística 5.0</div>
+      </div>
+
+      <div class="step-nav-bar">
+        <button class="step-chip" onclick="goToSlide(1)"><i class="fa-solid fa-1"></i> Registro</button>
+        <button class="step-chip active" onclick="goToSlide(2)"><i class="fa-solid fa-2"></i> Requerimientos</button>
+        <button class="step-chip" onclick="goToSlide(3)"><i class="fa-solid fa-3"></i> Operativa</button>
+        <button class="step-chip" onclick="goToSlide(4)"><i class="fa-solid fa-4"></i> Cotización</button>
+        <button class="step-chip" onclick="goToSlide(5)"><i class="fa-solid fa-5"></i> Resumen</button>
+        <button class="step-chip" onclick="goToSlide(6)"><i class="fa-solid fa-6"></i> Fin</button>
+      </div>
+
+      <button class="help-btn" onclick="openGlossary()"><i class="fa-solid fa-circle-question"></i> Glosario</button>
+    </div>
+
+    <div>
+      <h2 style="font-size: 22px; color: #4B4443; margin-bottom: 12px;">Evaluación Logística: Almacenamiento y Carga</h2>
+
+      <div class="question-card">
+        <div class="question-text">¿Requiere almacenamiento temporal y preparación de pedidos (Fulfillment / Pick & Pack)?</div>
+        <select class="select-sm" id="q1" onchange="calculateQuote()">
+          <option value="No">No</option>
+          <option value="Si">Si</option>
+        </select>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">¿Maneja volúmenes con entregas express o entregas en menos de 24 horas en GBA/CABA?</div>
+        <select class="select-sm" id="q2" onchange="calculateQuote()">
+          <option value="No">No</option>
+          <option value="Si">Si</option>
+        </select>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">¿Requiere integración tecnológica vía API / Webhook con sus plataformas e-commerce?</div>
+        <select class="select-sm" id="q3" onchange="calculateQuote()">
+          <option value="No">No</option>
+          <option value="Si">Si</option>
+        </select>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">¿Realiza envíos internacionales de paquetería / Courier con trámite aduanero simplificado?</div>
+        <select class="select-sm" id="q4" onchange="calculateQuote()">
+          <option value="No">No</option>
+          <option value="Si">Si</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="nav-footer">
+      <button class="nav-btn" onclick="goToSlide(1)"><i class="fa-solid fa-arrow-left"></i> Anterior</button>
+      <button class="nav-btn" onclick="goToSlide(3)">Siguiente <i class="fa-solid fa-arrow-right"></i></button>
+    </div>
+  </div>
+
+
+  <!-- SLIDE 3: PREGUNTAS PARTE 2 -->
+  <div class="slide-container" id="slide3">
+    <div class="brand-header">
+      <div class="logo-box">
+        <div class="logo-main">FAST<span>TRACK</span></div>
+        <div class="logo-sub">Logística 5.0</div>
+      </div>
+
+      <div class="step-nav-bar">
+        <button class="step-chip" onclick="goToSlide(1)"><i class="fa-solid fa-1"></i> Registro</button>
+        <button class="step-chip" onclick="goToSlide(2)"><i class="fa-solid fa-2"></i> Requerimientos</button>
+        <button class="step-chip active" onclick="goToSlide(3)"><i class="fa-solid fa-3"></i> Operativa</button>
+        <button class="step-chip" onclick="goToSlide(4)"><i class="fa-solid fa-4"></i> Cotización</button>
+        <button class="step-chip" onclick="goToSlide(5)"><i class="fa-solid fa-5"></i> Resumen</button>
+        <button class="step-chip" onclick="goToSlide(6)"><i class="fa-solid fa-6"></i> Fin</button>
+      </div>
+
+      <button class="help-btn" onclick="openGlossary()"><i class="fa-solid fa-circle-question"></i> Glosario</button>
+    </div>
+
+    <div>
+      <h2 style="font-size: 22px; color: #4B4443; margin-bottom: 12px;">Evaluación Logística: Flota y Distribución Nacional</h2>
+
+      <div class="question-card">
+        <div class="question-text">¿Precisa unidades dedicadas o ploteo corporativo específico para su distribución?</div>
+        <select class="select-sm" id="q5" onchange="calculateQuote()">
+          <option value="No">No</option>
+          <option value="Si">Si</option>
+        </select>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">¿Requiere logística verde sustentable (unidades 100% eléctricas con menor huella de carbono)?</div>
+        <select class="select-sm" id="q6" onchange="calculateQuote()">
+          <option value="No">No</option>
+          <option value="Si">Si</option>
+        </select>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">¿Sus despachos cuentan con trazabilidad física mediante bolsas de seguridad Fast Pack?</div>
+        <select class="select-sm" id="q7" onchange="calculateQuote()">
+          <option value="No">No</option>
+          <option value="Si">Si</option>
+        </select>
+      </div>
+
+      <div class="question-card">
+        <div class="question-text">¿Requiere cobertura de correo privado certificado en todo el territorio nacional?</div>
+        <select class="select-sm" id="q8" onchange="calculateQuote()">
+          <option value="No">No</option>
+          <option value="Si">Si</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="nav-footer">
+      <button class="nav-btn" onclick="goToSlide(2)"><i class="fa-solid fa-arrow-left"></i> Anterior</button>
+      <button class="nav-btn" onclick="goToSlide(4)">Ver Cotización <i class="fa-solid fa-calculator"></i></button>
+    </div>
+  </div>
+
+
+  <!-- SLIDE 4: SIMULACIÓN DE COTIZACIÓN -->
+  <div class="slide-container" id="slide4">
+    <div class="brand-header">
+      <div class="logo-box">
+        <div class="logo-main">FAST<span>TRACK</span></div>
+        <div class="logo-sub">Logística 5.0</div>
+      </div>
+
+      <div class="step-nav-bar">
+        <button class="step-chip" onclick="goToSlide(1)"><i class="fa-solid fa-1"></i> Registro</button>
+        <button class="step-chip" onclick="goToSlide(2)"><i class="fa-solid fa-2"></i> Requerimientos</button>
+        <button class="step-chip" onclick="goToSlide(3)"><i class="fa-solid fa-3"></i> Operativa</button>
+        <button class="step-chip active" onclick="goToSlide(4)"><i class="fa-solid fa-4"></i> Cotización</button>
+        <button class="step-chip" onclick="goToSlide(5)"><i class="fa-solid fa-5"></i> Resumen</button>
+        <button class="step-chip" onclick="goToSlide(6)"><i class="fa-solid fa-6"></i> Fin</button>
+      </div>
+
+      <button class="help-btn" onclick="openGlossary()"><i class="fa-solid fa-circle-question"></i> Glosario</button>
+    </div>
+
+    <div>
+      <h2 style="font-size: 22px; color: #4B4443; margin-bottom: 4px;">Simulación de Cotización Logística</h2>
+      <p style="font-size: 13px; color: #666;">Estimación calculada automáticamente según las respuestas seleccionadas.</p>
+
+      <div class="card-row">
+        <div class="info-card">
+          <h3><i class="fa-solid fa-cubes"></i> Esquema de Servicios</h3>
+          <ul id="quote-services" style="list-style: none; padding: 0; font-size: 13px; line-height: 1.7;">
+            <li>• Distribución Estándar Postal</li>
+          </ul>
+        </div>
+
+        <div class="info-card">
+          <h3><i class="fa-solid fa-truck-fast"></i> Modalidad de Transporte</h3>
+          <p id="quote-fleet" style="font-size: 13px; color: #4B4443; margin-bottom: 10px;">Flota Mixta Estándar (Iveco / Kangoo)</p>
+          <div style="font-size: 11px; color: #888;">Sujeto a confirmación de volumen mensual.</div>
+        </div>
+
+        <div class="info-card" style="background: #FFF0F1; border-top-color: #BA1829;">
+          <h3 style="color: #BA1829;"><i class="fa-solid fa-tag"></i> Estimación de Tarifa</h3>
+          <div style="font-size: 12px; color: #666;">Costo Estimado Mensual / Operativo</div>
+          <div class="metric-badge" id="quote-price">$ 150.000 ARS</div>
+          <div style="font-size: 11px; color: #888; margin-top: 6px;">*Valores finales ajustados por el ejecutivo asignado.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-footer">
+      <button class="nav-btn" onclick="goToSlide(3)"><i class="fa-solid fa-arrow-left"></i> Ajustar Respuestas</button>
+      <button class="nav-btn" onclick="goToSlide(5)">Ver Resumen <i class="fa-solid fa-list-check"></i></button>
+    </div>
+  </div>
+
+
+  <!-- SLIDE 5: RESUMEN Y BOTÓN ENVIAR -->
+  <div class="slide-container" id="slide5">
+    <div class="brand-header">
+      <div class="logo-box">
+        <div class="logo-main">FAST<span>TRACK</span></div>
+        <div class="logo-sub">Logística 5.0</div>
+      </div>
+
+      <div class="step-nav-bar">
+        <button class="step-chip" onclick="goToSlide(1)"><i class="fa-solid fa-1"></i> Registro</button>
+        <button class="step-chip" onclick="goToSlide(2)"><i class="fa-solid fa-2"></i> Requerimientos</button>
+        <button class="step-chip" onclick="goToSlide(3)"><i class="fa-solid fa-3"></i> Operativa</button>
+        <button class="step-chip" onclick="goToSlide(4)"><i class="fa-solid fa-4"></i> Cotización</button>
+        <button class="step-chip active" onclick="goToSlide(5)"><i class="fa-solid fa-5"></i> Resumen</button>
+        <button class="step-chip" onclick="goToSlide(6)"><i class="fa-solid fa-6"></i> Fin</button>
+      </div>
+
+      <button class="help-btn" onclick="openGlossary()"><i class="fa-solid fa-circle-question"></i> Glosario</button>
+    </div>
+
+    <div>
+      <h2 style="font-size: 22px; color: #4B4443; margin-bottom: 8px;">Resumen del Relevamiento</h2>
+
+      <div class="card-row">
+        <div class="info-card" style="flex: 1;">
+          <h3><i class="fa-solid fa-user"></i> Datos del Cliente</h3>
+          <p style="font-size: 13px; margin-bottom: 4px;"><b>Nombre:</b> <span id="res-nombre">-</span></p>
+          <p style="font-size: 13px; margin-bottom: 4px;"><b>Empresa:</b> <span id="res-empresa">-</span></p>
+          <p style="font-size: 13px; margin-bottom: 4px;"><b>Email:</b> <span id="res-email">-</span></p>
+          <p style="font-size: 13px; margin-bottom: 4px;"><b>Teléfono:</b> <span id="res-telefono">-</span></p>
+        </div>
+
+        <div class="info-card" style="flex: 1;">
+          <h3><i class="fa-solid fa-paper-plane"></i> Destinatario Comercial</h3>
+          <p style="font-size: 13px; margin-bottom: 4px;"><b>Ejecutivo:</b> <span id="res-ejecutivo">No elegido</span></p>
+          <p style="font-size: 13px; margin-bottom: 4px;"><b>Correo Destino:</b></p>
+          <div style="background: #F2F2F2; padding: 6px 10px; border-radius: 6px; font-weight: 700; color: #BA1829; font-size: 12px;" id="res-mail-destino">
+            Seleccione un ejecutivo en el Paso 1
+          </div>
+        </div>
+      </div>
+
+      <div class="info-card" style="margin-top: 12px;">
+        <h3><i class="fa-solid fa-clipboard-check"></i> Resumen de Cotización</h3>
+        <p style="font-size: 13px; color: #4B4443;" id="res-cotizacion-resumen">Servicio Básico de Distribución Postal (Estimado: $ 150.000 ARS)</p>
+      </div>
+    </div>
+
+    <div style="display: flex; justify-content: center; margin-bottom: 6px;">
+      <button class="btn-action" onclick="submitForm()">
+        <i class="fa-solid fa-paper-plane"></i> Enviar Solicitud
+      </button>
+    </div>
+
+    <div class="nav-footer">
+      <button class="nav-btn" onclick="goToSlide(4)"><i class="fa-solid fa-arrow-left"></i> Modificar</button>
+      <span style="font-size: 12px; color: #888;">El resumen se notificará al correo corporativo del ejecutivo seleccionado.</span>
+    </div>
+  </div>
+
+
+  <!-- SLIDE 6: AGRADECIMIENTO -->
+  <div class="slide-container" id="slide6" style="text-align: center; justify-content: space-between; align-items: center;">
+    <div class="brand-header" style="width: 100%;">
+      <div class="logo-box">
+        <div class="logo-main">FAST<span>TRACK</span></div>
+        <div class="logo-sub">Logística 5.0</div>
+      </div>
+
+      <div class="step-nav-bar">
+        <button class="step-chip" onclick="goToSlide(1)"><i class="fa-solid fa-1"></i> Registro</button>
+        <button class="step-chip" onclick="goToSlide(2)"><i class="fa-solid fa-2"></i> Requerimientos</button>
+        <button class="step-chip" onclick="goToSlide(3)"><i class="fa-solid fa-3"></i> Operativa</button>
+        <button class="step-chip" onclick="goToSlide(4)"><i class="fa-solid fa-4"></i> Cotización</button>
+        <button class="step-chip" onclick="goToSlide(5)"><i class="fa-solid fa-5"></i> Resumen</button>
+        <button class="step-chip active" onclick="goToSlide(6)"><i class="fa-solid fa-6"></i> Fin</button>
+      </div>
+
+      <button class="help-btn" onclick="openGlossary()"><i class="fa-solid fa-circle-question"></i> Glosario</button>
+    </div>
+
+    <div style="max-width: 750px; background: #FFFFFF; padding: 36px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); border-top: 6px solid #BA1829; margin: auto 0;">
+      <div style="width: 70px; height: 70px; background: #FFF0F1; color: #BA1829; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 32px; margin: 0 auto 20px auto;">
+        <i class="fa-solid fa-check"></i>
+      </div>
+      <h1 style="font-size: 26px; color: #4B4443; margin-bottom: 12px;">¡Solicitud Enviada con Éxito!</h1>
+      <p style="font-size: 16px; color: #666; line-height: 1.5; margin-bottom: 24px;">
+        Gracias por completar la información. Un ejecutivo comercial de Fast Track se pondrá en contacto a la brevedad.
+      </p>
+      <a href="https://fasttrack.com.ar/" target="_blank" class="btn-action" style="display: inline-flex; text-decoration: none;">
+        <i class="fa-solid fa-globe"></i> Visitar Sitio Web Oficial
+      </a>
+    </div>
+
+    <div class="nav-footer" style="width: 100%;">
+      <button class="nav-btn" onclick="goToSlide(1)"><i class="fa-solid fa-rotate-right"></i> Nueva Cotización</button>
+      <span style="font-size: 12px; color: #888;">Fast Track • Soluciones de Transporte y Logística Integral</span>
+    </div>
+  </div>
+
+
+  <!-- GLOSSARY MODAL -->
+  <div class="modal-overlay" id="glossary-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><i class="fa-solid fa-book-open"></i> Glosario y Términos Logística 5.0</h2>
+        <button class="close-modal" onclick="closeGlossary()">&times;</button>
+      </div>
+
+      <div class="glossary-item">
+        <h4>Gravel (Cargas a Granel / Granelero)</h4>
+        <p>Modalidad de transporte de materiales o insumos sueltos sin empaque individual, optimizando el espacio y la logística de pesaje directo en planta o depósito.</p>
+      </div>
+
+      <div class="glossary-item">
+        <h4>Europallet (Palé Europeo)</h4>
+        <p>Plataforma estándar homologada de 1200 x 800 mm diseñada para maximizar el uso del espacio en camiones y almacenes automatizados en la cadena de distribución.</p>
+      </div>
+
+      <div class="glossary-item">
+        <h4>Pick &amp; Pack</h4>
+        <p>Proceso de recolección de productos individuales de estanterías (picking) y su posterior empaquetado, etiquetado y precintado (packing) para despacho directo.</p>
+      </div>
+
+      <div class="glossary-item">
+        <h4>SKU (Stock Keeping Unit)</h4>
+        <p>Código alfa-numérico único asignado a cada producto o variante en inventario para posibilitar el control y seguimiento de stock en tiempo real.</p>
+      </div>
+
+      <div class="glossary-item">
+        <h4>Cross-Docking</h4>
+        <p>Estrategia logística donde los envíos recibidos en el centro de distribución son consolidados y redistribuidos a destino de inmediato sin almacenamiento prolongado.</p>
+      </div>
+
+      <div class="glossary-item">
+        <h4>First Mile &amp; Last Mile (Milla Inicial / Última Milla)</h4>
+        <p>Milla Inicial es la recolección en origen (fábrica o proveedor); Última Milla es el tramo final del trayecto hasta la entrega efectiva en el domicilio del consumidor final.</p>
+      </div>
+    </div>
+  </div>
+
+
+  <script>
+    let currentSlide = 1;
+    let selectedExecutiveEmail = '';
+
+    // Open/Close Glossary Modal
+    function openGlossary() {
+      const modal = document.getElementById('glossary-modal');
+      if (modal) modal.style.display = 'flex';
+    }
+
+    function closeGlossary() {
+      const modal = document.getElementById('glossary-modal');
+      if (modal) modal.style.display = 'none';
+    }
+
+    // Direct Slide Navigation
+    function goToSlide(index) {
+      for (let i = 1; i <= 6; i++) {
+        const slide = document.getElementById('slide' + i);
+        if (slide) {
+          if (i === index) {
+            slide.classList.add('active-slide');
+          } else {
+            slide.classList.remove('active-slide');
+          }
+        }
+      }
+      currentSlide = index;
+
+      // Update Active State on Chip Navigation Bars across all slides
+      document.querySelectorAll('.step-nav-bar').forEach(bar => {
+        const chips = bar.querySelectorAll('.step-chip');
+        chips.forEach((chip, chipIndex) => {
+          if (chipIndex + 1 === index) {
+            chip.classList.add('active');
+          } else {
+            chip.classList.remove('active');
+          }
+        });
+      });
+    }
+
+    function updateExecutiveEmail() {
+      const select = document.getElementById('select-ejecutivo');
+      const resEjecutivo = document.getElementById('res-ejecutivo');
+      const resMail = document.getElementById('res-mail-destino');
+
+      if (select && select.value) {
+        const parts = select.value.split('|');
+        const nombre = parts[0];
+        const mail = parts[1];
+        
+        selectedExecutiveEmail = mail;
+        if (resEjecutivo) resEjecutivo.textContent = nombre;
+        if (resMail) resMail.textContent = mail;
+      } else {
+        selectedExecutiveEmail = '';
+        if (resEjecutivo) resEjecutivo.textContent = 'No elegido';
+        if (resMail) resMail.textContent = 'Seleccione un ejecutivo en el Paso 1';
+      }
+    }
+
+    function updateSummary() {
+      const nombre = document.getElementById('input-nombre')?.value || '-';
+      const empresa = document.getElementById('input-empresa')?.value || '-';
+      const email = document.getElementById('input-email')?.value || '-';
+      const telefono = document.getElementById('input-telefono')?.value || '-';
+
+      const resNombre = document.getElementById('res-nombre');
+      const resEmpresa = document.getElementById('res-empresa');
+      const resEmail = document.getElementById('res-email');
+      const resTelefono = document.getElementById('res-telefono');
+
+      if (resNombre) resNombre.textContent = nombre;
+      if (resEmpresa) resEmpresa.textContent = empresa;
+      if (resEmail) resEmail.textContent = email;
+      if (resTelefono) resTelefono.textContent = telefono;
+    }
+
+    // Safe retriever helper to avoid reading properties of null
+    function getVal(id) {
+      const el = document.getElementById(id);
+      return el ? el.value === 'Si' : false;
+    }
+
+    function calculateQuote() {
+      const q1 = getVal('q1');
+      const q2 = getVal('q2');
+      const q3 = getVal('q3');
+      const q4 = getVal('q4');
+      const q5 = getVal('q5');
+      const q6 = getVal('q6');
+      const q7 = getVal('q7');
+      const q8 = getVal('q8');
+
+      let basePrice = 150000;
+      let services = ['Distribución Estándar Postal'];
+      let fleet = 'Flota Mixta Estándar (Iveco / Kangoo)';
+
+      if (q1) { basePrice += 120000; services.push('Almacenamiento y Fulfillment (Pick & Pack)'); }
+      if (q2) { basePrice += 80000; services.push('Entregas Express Same-Day / 24hs'); }
+      if (q3) { basePrice += 30000; services.push('Integración API & Webhook e-Commerce'); }
+      if (q4) { basePrice += 150000; services.push('Courier Internacional Simplificado'); }
+      if (q5) { basePrice += 90000; fleet = 'Unidades Dedicadas con Ploteo Corporativo'; }
+      if (q6) { basePrice += 50000; fleet += ' + Unidades 100% Eléctricas (Eco)'; }
+      if (q7) { services.push('Bolsas de Seguridad Fast Pack'); }
+      if (q8) { services.push('Correo Privado Certificado Nacional'); }
+
+      const quoteServicesEl = document.getElementById('quote-services');
+      if (quoteServicesEl) {
+        quoteServicesEl.innerHTML = services.map(s => `<li>• ${s}</li>`).join('');
+      }
+
+      const quoteFleetEl = document.getElementById('quote-fleet');
+      if (quoteFleetEl) {
+        quoteFleetEl.textContent = fleet;
+      }
+
+      const formattedPrice = '$ ' + basePrice.toLocaleString('es-AR') + ' ARS';
+      const quotePriceEl = document.getElementById('quote-price');
+      if (quotePriceEl) {
+        quotePriceEl.textContent = formattedPrice;
+      }
+
+      const resCotizacionEl = document.getElementById('res-cotizacion-resumen');
+      if (resCotizacionEl) {
+        resCotizacionEl.textContent = `${services.join(', ')} (Estimado: ${formattedPrice})`;
+      }
+    }
+
+    function submitForm() {
+      goToSlide(6);
+    }
+
+    window.onload = function() {
+      goToSlide(1);
+      calculateQuote();
+
+      // Close modal on background overlay click
+      window.onclick = function(event) {
+        const modal = document.getElementById('glossary-modal');
+        if (event.target === modal) {
+          closeGlossary();
+        }
+      };
+    };
+  </script>
+
+</body>
+</html>
